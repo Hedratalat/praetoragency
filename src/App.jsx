@@ -8,11 +8,22 @@ const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Services = lazy(() => import("./pages/Services"));
 const Pricing = lazy(() => import("./pages/Pricing"));
+
+// Spinner component
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center h-screen">
+    <div
+      className="w-16 h-16 border-4 border-t-primary border-b-gray-300 border-l-gray-300 border-r-gray-300 
+      rounded-full animate-spin"
+    ></div>
+  </div>
+);
+
 function App() {
   return (
     <>
       <HashRouter>
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
