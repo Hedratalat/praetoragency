@@ -124,7 +124,7 @@ export default function Contact() {
 
                   <p className="flex items-center gap-3">
                     <FaPhoneAlt className="text-primary" />
-                    +20 123 456 7890
+                    +20 10 28579123
                   </p>
 
                   <p className="flex items-center gap-3">
@@ -135,7 +135,7 @@ export default function Contact() {
 
                 {/* WhatsApp */}
                 <a
-                  href="https://wa.me/201234567890"
+                  href="https://wa.me/+201028579123"
                   target="_blank"
                   rel="noreferrer"
                   className="mt-6 inline-flex items-center justify-center gap-3 w-full bg-green-500 hover:bg-green-600 transition-colors text-blackPure font-semibold py-3 rounded-xl"

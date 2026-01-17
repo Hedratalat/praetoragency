@@ -77,7 +77,7 @@ export default function HeroSection() {
               Book a Meeting
             </Button>
 
-            <Button variant="secondary" href="https://wa.me/1234567890">
+            <Button variant="secondary" href="https://wa.me/+201028579123">
               <FaWhatsapp className="mr-2 text-xl" />
               WhatsApp
             </Button>
