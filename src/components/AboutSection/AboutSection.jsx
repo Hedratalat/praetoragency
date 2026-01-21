@@ -98,12 +98,24 @@ export default function AboutSection() {
                   >
                     <div className="relative">
                       {/* Icon with glow */}
-                      <div className="w-14 h-12 mx-auto mb-3 bg-gradient-to-br from-primary to-primary-neon rounded-lg flex items-center justify-center transform group-hover:scale-110 transition-all duration-300">
+                      <div
+                        className="w-16 h-12 mx-auto mb-3   bg-gradient-to-br
+                       from-primary to-primary-neon rounded-lg flex items-center justify-center 
+                       transform group-hover:scale-110 transition-all duration-300"
+                      >
                         <Icon className="text-blackPure" size={32} />
                       </div>
 
                       {/* Number */}
-                      <div className="font-sans text-3xl md:text-4xl  font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent mb-1">
+                      <div
+                        className=" font-heading
+                        text-3xl md:text-4xl
+                        font-bold
+                        text-transparent
+                        bg-clip-text
+                        bg-gradient-to-r from-primary to-primary-neon
+                        mb-1"
+                      >
                         {stat.number}
                       </div>
 

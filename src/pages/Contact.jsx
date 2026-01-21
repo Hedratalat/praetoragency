@@ -20,7 +20,7 @@ export default function Contact() {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-heading font-bold text-primary">
+            <h2 className="text-3xl md:text-5xl font-heading font-bold text-primary">
               Contact Us
             </h2>
             <p className="text-gray-400 mt-4 max-w-2xl mx-auto">

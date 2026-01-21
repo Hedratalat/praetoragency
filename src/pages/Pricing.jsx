@@ -178,7 +178,7 @@ export default function PricingPage() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-4xl md:text-5xl font-heading font-bold text-primary">
+              <h2 className="text-3xl md:text-5xl font-heading font-bold text-primary">
                 Pricing Plans
               </h2>
               <p className="text-gray-400 mt-4 max-w-2xl mx-auto">
