@@ -3,6 +3,7 @@ import "./App.css";
 import "./index.css";
 import { lazy, Suspense } from "react";
 import Portfolio from "./pages/Portfolio";
+import { Toaster } from "react-hot-toast";
 
 const Home = lazy(() => import("./pages/Home"));
 const About = lazy(() => import("./pages/About"));
@@ -30,6 +31,8 @@ function App() {
   return (
     <>
       <HashRouter>
+        <Toaster position="top-center" reverseOrder={false} />
+
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             <Route path="/" element={<Home />} />
