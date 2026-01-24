@@ -12,10 +12,11 @@ const Services = lazy(() => import("./pages/Services"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const Blog = lazy(() => import("./pages/Blog"));
 
-const DashBoardLayout = lazy(() =>
-  import("./components/DashboardLayout/DashboardLayout")
+const DashBoardLayout = lazy(
+  () => import("./components/DashboardLayout/DashboardLayout"),
 );
 const AddServices = lazy(() => import("./pages/ServicesDash"));
+const MessageDash = lazy(() => import("./pages/MessageDash"));
 
 // Spinner component
 const LoadingSpinner = () => (
@@ -52,9 +53,7 @@ function App() {
             >
               <Route index element={<Navigate to="AddServices" replace />} />
               <Route path="AddServices" element={<AddServices />} />
-
-              {/* <Route path="Feedback" element={<FeedbackDash />} />
-              <Route path="message" element={<MessageDash />} /> */}
+              <Route path="message" element={<MessageDash />} />
             </Route>
           </Routes>
         </Suspense>

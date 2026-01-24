@@ -42,7 +42,7 @@ export default function AddServices() {
   const filteredIcons = MARKETING_ICONS.filter(
     ({ name, category }) =>
       name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      category.toLowerCase().includes(searchQuery.toLowerCase())
+      category.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const SelectedIconComponent = selectedIcon
