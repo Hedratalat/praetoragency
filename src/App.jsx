@@ -7,9 +7,9 @@ import { Toaster } from "react-hot-toast";
 
 const Home = lazy(() => import("./pages/Home"));
 const About = lazy(() => import("./pages/About"));
+const Pricing = lazy(() => import("./pages/Pricing"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Services = lazy(() => import("./pages/Services"));
-const Pricing = lazy(() => import("./pages/Pricing"));
 const Blog = lazy(() => import("./pages/Blog"));
 
 const DashBoardLayout = lazy(
@@ -17,6 +17,9 @@ const DashBoardLayout = lazy(
 );
 const AddServices = lazy(() => import("./pages/ServicesDash"));
 const MessageDash = lazy(() => import("./pages/MessageDash"));
+const PricingDash = lazy(() => import("./pages/PricingDash"));
+const BlogDash = lazy(() => import("./pages/BlogDash"));
+const PortfolioDash = lazy(() => import("./pages/PortfolioDash"));
 
 // Spinner component
 const LoadingSpinner = () => (
@@ -54,6 +57,9 @@ function App() {
               <Route index element={<Navigate to="AddServices" replace />} />
               <Route path="AddServices" element={<AddServices />} />
               <Route path="message" element={<MessageDash />} />
+              <Route path="pricingDash" element={<PricingDash />} />
+              <Route path="blogDash" element={<BlogDash />} />
+              <Route path="portfolioDash" element={<PortfolioDash />} />
             </Route>
           </Routes>
         </Suspense>

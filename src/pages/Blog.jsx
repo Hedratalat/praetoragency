@@ -11,8 +11,11 @@ import {
   TrendingUp,
   Target,
   Zap,
-  Sparkles,
+  X,
 } from "lucide-react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
+import { MARKETING_ICONS } from "../utils/marketing";
 import Navbar from "../components/Navbar/Navbar";
 
 const fadeIn = {
@@ -25,6 +28,20 @@ const fadeIn = {
 export default function Blog() {
   const [activeTab, setActiveTab] = useState("blog");
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // Data states
+  const [blogPosts, setBlogPosts] = useState([]);
+  const [caseStudies, setCaseStudies] = useState([]);
+  const [tips, setTips] = useState([]);
+
+  // Modal states
+  const [selectedArticle, setSelectedArticle] = useState(null);
+  const [showArticleModal, setShowArticleModal] = useState(false);
+
+  useEffect(() => {
+    fetchAllData();
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -38,225 +55,42 @@ export default function Blog() {
     return () => clearTimeout(timer);
   }, [activeTab, searchQuery]);
 
-  /* ================= DATA ================= */
-  const blogPosts = [
-    {
-      id: 1,
-      title: "Digital Marketing Strategies for 2026",
-      excerpt:
-        "Discover the latest trends and techniques in digital marketing and how to apply them to your business",
-      author: "Ahmed Mohamed",
-      readTime: "5 min read",
-      category: "Strategy",
-      image:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=500&fit=crop",
-    },
-    {
-      id: 2,
-      title: "How to Build a Strong Brand on Social Media",
-      excerpt:
-        "A comprehensive guide to building a strong and influential presence on social media platforms",
-      author: "Sarah Ali",
-      readTime: "7 min read",
-      category: "Social Media",
-      image:
-        "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&h=500&fit=crop",
-    },
-    {
-      id: 3,
-      title: "SEO Optimization: A Beginner's Guide",
-      excerpt:
-        "Learn the basics of SEO and how to improve your website's ranking in search results",
-      author: "Mahmoud Hassan",
-      readTime: "6 min read",
-      category: "SEO",
-      image:
-        "https://images.unsplash.com/photo-1432888622747-4eb9a8f2c5e0?w=800&h=500&fit=crop",
-    },
-    {
-      id: 4,
-      title: "Email Marketing Best Practices 2026",
-      excerpt:
-        "Boost your email campaigns with proven strategies that increase open rates and conversions",
-      author: "Layla Ibrahim",
-      readTime: "8 min read",
-      category: "Email Marketing",
-      image:
-        "https://images.unsplash.com/photo-1557200134-90327ee9fafa?w=800&h=500&fit=crop",
-    },
-    {
-      id: 5,
-      title: "Content Marketing That Converts",
-      excerpt:
-        "Create content that not only attracts but converts visitors into loyal customers",
-      author: "Omar Khalil",
-      readTime: "6 min read",
-      category: "Content",
-      image:
-        "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=500&fit=crop",
-    },
-    {
-      id: 6,
-      title: "The Power of Influencer Marketing",
-      excerpt:
-        "Learn how to leverage influencers to expand your reach and build authentic connections",
-      author: "Nour Hassan",
-      readTime: "5 min read",
-      category: "Influencer",
-      image:
-        "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=500&fit=crop",
-    },
-  ];
+  // Fetch data from Firebase
+  const fetchAllData = async () => {
+    setLoading(true);
+    try {
+      // Fetch blog posts
+      const blogSnapshot = await getDocs(collection(db, "blogPosts"));
+      const blogData = blogSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      blogData.sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity));
+      setBlogPosts(blogData);
 
-  const caseStudies = [
-    {
-      id: 1,
-      title: "E-commerce Store Triples Revenue in 6 Months",
-      company: "TechGear Electronics",
-      industry: "E-commerce",
-      challenge:
-        "TechGear was struggling with high cart abandonment rates (78%) and low conversion rates (1.2%). Despite good traffic, sales were stagnant.",
-      solution:
-        "We implemented a comprehensive strategy including abandoned cart email sequences, personalized product recommendations using AI, optimized checkout flow with one-click purchase, and retargeting campaigns on Facebook and Google.",
-      results: [
-        "Revenue increased by 312% in 6 months",
-        "Cart abandonment reduced to 32%",
-        "Conversion rate jumped to 4.8%",
-        "Average order value increased by 47%",
-        "Customer lifetime value up by 89%",
-      ],
-      timeline: "6 months",
-      investment: "$15,000",
-      roi: "620%",
-    },
-    {
-      id: 2,
-      title: "SaaS Company Scales from 0 to 10K Users",
-      company: "CloudFlow Solutions",
-      industry: "SaaS",
-      challenge:
-        "A new project management SaaS had zero brand awareness and struggled to acquire users in a competitive market dominated by established players.",
-      solution:
-        "Launched a content-driven growth strategy with SEO-optimized blog posts, created a free tool that went viral on Product Hunt, implemented referral program with rewards, and ran targeted LinkedIn ads to decision-makers.",
-      results: [
-        "10,000+ active users in 8 months",
-        "Featured on Product Hunt (#2 Product of the Day)",
-        "500+ organic backlinks from authority sites",
-        "MRR reached $42,000",
-        "40% of users came through referrals",
-      ],
-      timeline: "8 months",
-      investment: "$22,000",
-      roi: "380%",
-    },
-    {
-      id: 3,
-      title: "Local Restaurant Chain Dominates Regional Market",
-      company: "Burger Bistro",
-      industry: "Food & Beverage",
-      challenge:
-        "A family-owned burger chain with 5 locations had minimal online presence and was losing customers to delivery apps and competitors.",
-      solution:
-        "Built a mobile-first website with online ordering, created Instagram-worthy menu items and ran UGC campaigns, partnered with local food influencers, optimized Google My Business and local SEO, and launched a loyalty app.",
-      results: [
-        "Online orders increased by 440%",
-        "Instagram following grew from 2K to 45K",
-        "Opened 3 new locations due to demand",
-        "Featured in 5 major food publications",
-        "App downloads exceeded 18,000",
-      ],
-      timeline: "10 months",
-      investment: "$18,500",
-      roi: "520%",
-    },
-    {
-      id: 4,
-      title: "B2B Service Provider Generates 200+ Qualified Leads Monthly",
-      company: "Enterprise Consulting Group",
-      industry: "B2B Services",
-      challenge:
-        "A consulting firm relied heavily on cold outreach and networking events, with inconsistent lead flow and long sales cycles.",
-      solution:
-        "Developed thought leadership content strategy with whitepapers and webinars, implemented LinkedIn Sales Navigator campaigns, created case study library with measurable results, and optimized website for lead capture with valuable lead magnets.",
-      results: [
-        "220+ qualified leads per month",
-        "Sales cycle reduced from 6 months to 3.5 months",
-        "Close rate improved from 8% to 24%",
-        "LinkedIn followers grew by 12,000",
-        "Webinar attendance averaged 300+ per session",
-      ],
-      timeline: "7 months",
-      investment: "$25,000",
-      roi: "450%",
-    },
-  ];
+      // Fetch case studies
+      const caseSnapshot = await getDocs(collection(db, "caseStudies"));
+      const caseData = caseSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      caseData.sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity));
+      setCaseStudies(caseData);
 
-  const tips = [
-    {
-      id: 1,
-      title: "Use the 80/20 Content Rule",
-      description:
-        "80% valuable educational content, 20% promotional. Build trust first, sell second.",
-      category: "Content",
-      icon: "📊",
-    },
-    {
-      id: 2,
-      title: "Know Your Audience Deeply",
-      description:
-        "Create detailed buyer personas. The more specific your targeting, the better your results.",
-      category: "Strategy",
-      icon: "🎯",
-    },
-    {
-      id: 3,
-      title: "Always A/B Test Everything",
-      description:
-        "Test headlines, images, CTAs, and copy. Small changes can lead to massive improvements.",
-      category: "Optimization",
-      icon: "🔬",
-    },
-    {
-      id: 4,
-      title: "Engagement > Follower Count",
-      description:
-        "1,000 engaged followers beat 10,000 inactive ones. Focus on quality over quantity.",
-      category: "Social Media",
-      icon: "💬",
-    },
-    {
-      id: 5,
-      title: "Video Content Wins",
-      description:
-        "Video generates 12x more engagement than text and images combined. Invest in it.",
-      category: "Content",
-      icon: "🎥",
-    },
-    {
-      id: 6,
-      title: "Monitor Your Competitors",
-      description:
-        "Learn from their wins and mistakes. Use tools like SEMrush and SimilarWeb for insights.",
-      category: "Strategy",
-      icon: "👀",
-    },
-    {
-      id: 7,
-      title: "Mobile-First Design Always",
-      description:
-        "70% of users browse on mobile. If your site isn't mobile-optimized, you're losing sales.",
-      category: "UX",
-      icon: "📱",
-    },
-    {
-      id: 8,
-      title: "Leverage User-Generated Content",
-      description:
-        "Customer reviews and testimonials convert 5x better than brand content. Use them.",
-      category: "Content",
-      icon: "⭐",
-    },
-  ];
+      // Fetch tips
+      const tipsSnapshot = await getDocs(collection(db, "tips"));
+      const tipsData = tipsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      tipsData.sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity));
+      setTips(tipsData);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const tabs = [
     { id: "blog", label: "Blog", icon: BookOpen },
@@ -268,11 +102,25 @@ export default function Blog() {
   const filterBySearch = (items, fields) =>
     items.filter((item) =>
       fields.some((field) =>
-        item[field]?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+        item[field]?.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
     );
 
-  /* ================= UI ================= */
+  const getIconComponent = (iconName) => {
+    const iconData = MARKETING_ICONS.find((i) => i.name === iconName);
+    return iconData?.icon || Lightbulb;
+  };
+
+  const openArticleModal = (article) => {
+    setSelectedArticle(article);
+    setShowArticleModal(true);
+  };
+
+  const closeArticleModal = () => {
+    setShowArticleModal(false);
+    setSelectedArticle(null);
+  };
+
   return (
     <>
       <Navbar />
@@ -298,12 +146,6 @@ export default function Blog() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-              ></motion.div>
               <h2 className="text-3xl md:text-5xl font-heading font-bold text-primary">
                 Marketing Insights & Strategies
               </h2>
@@ -375,365 +217,581 @@ export default function Blog() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 py-8 sm:py-16 space-y-12 sm:space-y-20">
-          {/* BLOG = ALL */}
-          {activeTab === "blog" && (
+          {loading ? (
+            <div className="text-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="text-gray-400 mt-4">Loading content...</p>
+            </div>
+          ) : (
             <>
-              {/* ARTICLES */}
-              <section>
-                <motion.div {...fadeIn}>
-                  <h2 className="text-2xl sm:text-3xl font-heading font-bold mb-6 sm:mb-8 flex items-center gap-3">
-                    <BookOpen className="text-primary w-6 h-6 sm:w-8 sm:h-8" />
-                    Latest Articles
-                  </h2>
-                </motion.div>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                  {filterBySearch(blogPosts, ["title", "excerpt"]).map(
-                    (p, idx) => (
-                      <motion.article
-                        key={p.id}
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: idx * 0.1, duration: 0.5 }}
-                        className="relative group"
-                      >
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-primary-neon rounded-2xl opacity-0 group-hover:opacity-20 blur transition-all duration-500"></div>
-                        <div className="relative bg-cardBg rounded-2xl overflow-hidden border border-primary/20 hover:border-primary/50 transition-all">
-                          <div className="relative overflow-hidden">
-                            <img
-                              src={p.image}
-                              alt={p.title}
-                              className="h-40 sm:h-48 w-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            />
-                            <div className="absolute top-3 left-3 bg-gradient-to-r from-primary to-primary-neon px-3 py-1 rounded-full text-xs sm:text-sm font-semibold text-blackPure">
-                              {p.category}
-                            </div>
-                          </div>
-                          <div className="p-4 sm:p-6">
-                            <h3 className="text-lg sm:text-xl font-heading font-semibold mt-2 mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-primary-neon transition-all">
-                              {p.title}
-                            </h3>
-                            <p className="text-gray-400 mb-4 line-clamp-2 text-sm sm:text-base">
-                              {p.excerpt}
-                            </p>
-                            <div className="flex justify-between text-xs sm:text-sm text-gray-500 mb-4">
-                              <span className="flex gap-1 items-center">
-                                <User className="w-3 h-3 sm:w-4 sm:h-4" />
-                                {p.author}
-                              </span>
-                              <span className="flex gap-1 items-center">
-                                <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                                {p.readTime}
-                              </span>
-                            </div>
-                            <button className="w-full bg-gradient-to-r from-primary to-primary-neon text-blackPure py-2.5 rounded-lg font-heading font-semibold hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base group/btn">
-                              Read More
-                              <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                            </button>
-                          </div>
+              {/* BLOG = ALL */}
+              {activeTab === "blog" && (
+                <>
+                  {/* ARTICLES */}
+                  {blogPosts.length > 0 && (
+                    <section>
+                      <motion.div {...fadeIn}>
+                        <h2 className="text-2xl sm:text-3xl font-heading font-bold mb-6 sm:mb-8 flex items-center gap-3">
+                          <BookOpen className="text-primary w-6 h-6 sm:w-8 sm:h-8" />
+                          Latest Articles
+                        </h2>
+                      </motion.div>
+                      {filterBySearch(blogPosts, ["title", "excerpt"]).length >
+                      0 ? (
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                          {filterBySearch(blogPosts, ["title", "excerpt"]).map(
+                            (p, idx) => (
+                              <motion.article
+                                key={p.id}
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{
+                                  delay: idx * 0.1,
+                                  duration: 0.5,
+                                }}
+                                className="relative group h-full"
+                              >
+                                <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-primary-neon rounded-2xl opacity-0 group-hover:opacity-20 blur transition-all duration-500"></div>
+                                <div className="relative bg-cardBg rounded-2xl overflow-hidden border border-primary/20 hover:border-primary/50 transition-all h-full flex flex-col">
+                                  <div className="relative overflow-hidden">
+                                    <img
+                                      src={p.image}
+                                      alt={p.title}
+                                      className="h-40 sm:h-48 w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    />
+                                    <div className="absolute top-3 left-3 bg-gradient-to-r from-primary to-primary-neon px-3 py-1 rounded-full text-xs sm:text-sm font-semibold text-blackPure">
+                                      {p.category}
+                                    </div>
+                                  </div>
+                                  <div className="p-4 sm:p-6 flex-1 flex flex-col">
+                                    <h3 className="text-lg sm:text-xl font-heading font-semibold mt-2 mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-primary-neon transition-all line-clamp-2">
+                                      {p.title}
+                                    </h3>
+                                    <p className="text-gray-400 mb-4 line-clamp-2 text-sm sm:text-base flex-1">
+                                      {p.excerpt}
+                                    </p>
+                                    <div className="flex justify-between text-xs sm:text-sm text-gray-500 mb-4">
+                                      <span className="flex gap-1 items-center">
+                                        <User className="w-3 h-3 sm:w-4 sm:h-4" />
+                                        {p.author}
+                                      </span>
+                                      <span className="flex gap-1 items-center">
+                                        <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                                        {p.readTime} min read
+                                      </span>
+                                    </div>
+                                    <button
+                                      onClick={() => openArticleModal(p)}
+                                      className="w-full bg-gradient-to-r from-primary to-primary-neon text-blackPure py-2.5 rounded-lg font-heading font-semibold hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base group/btn"
+                                    >
+                                      Read More
+                                      <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                                    </button>
+                                  </div>
+                                </div>
+                              </motion.article>
+                            ),
+                          )}
                         </div>
-                      </motion.article>
-                    )
+                      ) : (
+                        <div className="text-center py-12">
+                          <Search className="w-16 h-16 text-gray-600 mx-auto mb-4 opacity-50" />
+                          <h3 className="text-xl font-bold text-gray-400 mb-2">
+                            No articles found
+                          </h3>
+                          <p className="text-gray-500">
+                            Try adjusting your search to find what you're
+                            looking for.
+                          </p>
+                        </div>
+                      )}
+                    </section>
                   )}
-                </div>
-              </section>
 
-              {/* CASE STUDIES */}
-              <section>
-                <motion.div {...fadeIn}>
-                  <h2 className="text-2xl sm:text-3xl font-heading font-bold mb-6 sm:mb-8 flex items-center gap-3">
-                    <TrendingUp className="text-primary w-6 h-6 sm:w-8 sm:h-8" />
-                    Success Stories
-                  </h2>
-                </motion.div>
-                <div className="grid lg:grid-cols-2 gap-6 sm:gap-8">
-                  {caseStudies.map((c, idx) => (
-                    <motion.div
-                      key={c.id}
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: idx * 0.1, duration: 0.5 }}
-                      className="relative group"
-                    >
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-primary-neon rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-all duration-500"></div>
-                      <div className="relative bg-gradient-to-br from-cardBg to-bodyBg p-6 sm:p-8 rounded-2xl border border-primary/20 hover:border-primary/50 transition-all">
-                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
-                          <div className="flex-1">
-                            <div className="text-primary-light text-xs sm:text-sm font-semibold mb-2">
-                              {c.industry}
-                            </div>
-                            <h3 className="text-xl sm:text-2xl font-heading font-bold mb-2">
-                              {c.title}
-                            </h3>
-                            <p className="text-gray-400 text-sm sm:text-base">
-                              {c.company}
-                            </p>
-                          </div>
-                          <div className="bg-primary/20 border border-primary rounded-lg px-3 py-2 text-primary font-bold text-sm whitespace-nowrap">
-                            ROI: {c.roi}
-                          </div>
+                  {/* CASE STUDIES */}
+                  {caseStudies.length > 0 && (
+                    <section>
+                      <motion.div {...fadeIn}>
+                        <h2 className="text-2xl sm:text-3xl font-heading font-bold mb-6 sm:mb-8 flex items-center gap-3">
+                          <TrendingUp className="text-primary w-6 h-6 sm:w-8 sm:h-8" />
+                          Success Stories
+                        </h2>
+                      </motion.div>
+                      {filterBySearch(caseStudies, [
+                        "title",
+                        "company",
+                        "industry",
+                      ]).length > 0 ? (
+                        <div className="grid lg:grid-cols-2 gap-6 sm:gap-8">
+                          {filterBySearch(caseStudies, [
+                            "title",
+                            "company",
+                            "industry",
+                          ]).map((c, idx) => (
+                            <motion.div
+                              key={c.id}
+                              initial={{ opacity: 0, y: 30 }}
+                              whileInView={{ opacity: 1, y: 0 }}
+                              viewport={{ once: true }}
+                              transition={{ delay: idx * 0.1, duration: 0.5 }}
+                              className="relative group h-full"
+                            >
+                              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-primary-neon rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-all duration-500"></div>
+                              <div className="relative bg-gradient-to-br from-cardBg to-bodyBg p-6 sm:p-8 rounded-2xl border border-primary/20 hover:border-primary/50 transition-all h-full flex flex-col">
+                                <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
+                                  <div className="flex-1">
+                                    <div className="text-primary-light text-xs sm:text-sm font-semibold mb-2">
+                                      {c.industry}
+                                    </div>
+                                    <h3 className="text-xl sm:text-2xl font-heading font-bold mb-2">
+                                      {c.title}
+                                    </h3>
+                                    <p className="text-gray-400 text-sm sm:text-base">
+                                      {c.company}
+                                    </p>
+                                  </div>
+                                  <div className="bg-primary/20 border border-primary rounded-lg px-3 py-2 text-primary font-bold text-sm whitespace-nowrap">
+                                    ROI: {c.roi}%
+                                  </div>
+                                </div>
+
+                                <div className="space-y-4 mb-6 flex-1">
+                                  <div>
+                                    <h4 className="text-xs sm:text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
+                                      <Target className="w-4 h-4 text-red-400" />
+                                      Challenge
+                                    </h4>
+                                    <p className="text-gray-400 text-xs sm:text-sm line-clamp-2">
+                                      {c.challenge}
+                                    </p>
+                                  </div>
+
+                                  <div>
+                                    <h4 className="text-xs sm:text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
+                                      <Zap className="w-4 h-4 text-yellow-400" />
+                                      Solution
+                                    </h4>
+                                    <p className="text-gray-400 text-xs sm:text-sm line-clamp-2">
+                                      {c.solution}
+                                    </p>
+                                  </div>
+
+                                  <div>
+                                    <h4 className="text-xs sm:text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
+                                      <TrendingUp className="w-4 h-4 text-green-400" />
+                                      Results ({c.results?.length || 0})
+                                    </h4>
+                                    <ul className="space-y-2">
+                                      {(c.results || [])
+                                        .slice(0, 2)
+                                        .map((r, i) => (
+                                          <li
+                                            key={i}
+                                            className="text-gray-300 text-xs sm:text-sm flex items-start gap-2"
+                                          >
+                                            <span className="text-primary mt-1">
+                                              ✓
+                                            </span>
+                                            {r}
+                                          </li>
+                                        ))}
+                                      {c.results?.length > 2 && (
+                                        <button
+                                          onClick={() => {
+                                            setActiveTab("cases");
+                                            window.scrollTo({
+                                              top: 0,
+                                              behavior: "smooth",
+                                            });
+                                          }}
+                                          className="text-primary text-xs font-semibold hover:underline"
+                                        >
+                                          +{c.results.length - 2} more results
+                                        </button>
+                                      )}
+                                    </ul>
+                                  </div>
+                                </div>
+
+                                <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400 pt-4 border-t border-primary/20">
+                                  <span>Timeline: {c.timeline} months</span>
+                                  <span className="hidden sm:inline">•</span>
+                                  <span>Investment: {c.investment}</span>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
                         </div>
+                      ) : (
+                        <div className="text-center py-12">
+                          <Search className="w-16 h-16 text-gray-600 mx-auto mb-4 opacity-50" />
+                          <h3 className="text-xl font-bold text-gray-400 mb-2">
+                            No case studies found
+                          </h3>
+                          <p className="text-gray-500">
+                            Try adjusting your search to find what you're
+                            looking for.
+                          </p>
+                        </div>
+                      )}
+                    </section>
+                  )}
 
-                        <div className="space-y-4 mb-6">
-                          <div>
-                            <h4 className="text-xs sm:text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
-                              <Target className="w-4 h-4 text-red-400" />
-                              Challenge
-                            </h4>
-                            <p className="text-gray-400 text-xs sm:text-sm">
-                              {c.challenge}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h4 className="text-xs sm:text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
-                              <Zap className="w-4 h-4 text-yellow-400" />
-                              Solution
-                            </h4>
-                            <p className="text-gray-400 text-xs sm:text-sm">
-                              {c.solution}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h4 className="text-xs sm:text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
-                              <TrendingUp className="w-4 h-4 text-green-400" />
-                              Results
-                            </h4>
-                            <ul className="space-y-2">
-                              {c.results.map((r, i) => (
-                                <li
-                                  key={i}
-                                  className="text-gray-300 text-xs sm:text-sm flex items-start gap-2"
+                  {/* TIPS */}
+                  {tips.length > 0 && (
+                    <section>
+                      <motion.div {...fadeIn}>
+                        <h2 className="text-2xl sm:text-3xl font-heading font-bold mb-6 sm:mb-8 flex items-center gap-3">
+                          <Lightbulb className="text-primary w-6 h-6 sm:w-8 sm:h-8" />
+                          Quick Tips
+                        </h2>
+                      </motion.div>
+                      {filterBySearch(tips, ["title", "description"]).length >
+                      0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                          {filterBySearch(tips, ["title", "description"]).map(
+                            (t, idx) => {
+                              const TipIcon = getIconComponent(t.icon);
+                              return (
+                                <motion.div
+                                  key={t.id}
+                                  initial={{ opacity: 0, y: 30 }}
+                                  whileInView={{ opacity: 1, y: 0 }}
+                                  viewport={{ once: true }}
+                                  transition={{
+                                    delay: idx * 0.05,
+                                    duration: 0.5,
+                                  }}
+                                  className="relative group h-full"
                                 >
-                                  <span className="text-primary mt-1">✓</span>
-                                  {r}
-                                </li>
-                              ))}
-                            </ul>
+                                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-primary-neon rounded-2xl opacity-0 group-hover:opacity-20 blur transition-all duration-500"></div>
+                                  <div className="relative bg-cardBg p-6 rounded-2xl border border-primary/20 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 transition-all h-full flex flex-col">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-primary-light to-primary rounded-xl flex items-center justify-center mb-3">
+                                      <TipIcon className="text-white w-6 h-6" />
+                                    </div>
+                                    <span className="text-primary text-xs sm:text-sm font-semibold">
+                                      {t.category}
+                                    </span>
+                                    <h4 className="font-heading font-semibold mt-2 mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-primary-neon transition-all text-sm sm:text-base line-clamp-2">
+                                      {t.title}
+                                    </h4>
+                                    <p className="text-gray-400 text-xs sm:text-sm line-clamp-3 flex-1">
+                                      {t.description}
+                                    </p>
+                                  </div>
+                                </motion.div>
+                              );
+                            },
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-center py-12">
+                          <Search className="w-16 h-16 text-gray-600 mx-auto mb-4 opacity-50" />
+                          <h3 className="text-xl font-bold text-gray-400 mb-2">
+                            No tips found
+                          </h3>
+                          <p className="text-gray-500">
+                            Try adjusting your search to find what you're
+                            looking for.
+                          </p>
+                        </div>
+                      )}
+                    </section>
+                  )}
+                </>
+              )}
+
+              {/* ARTICLES ONLY */}
+              {activeTab === "articles" && (
+                <>
+                  {filterBySearch(blogPosts, ["title", "excerpt"]).length >
+                  0 ? (
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                      {filterBySearch(blogPosts, ["title", "excerpt"]).map(
+                        (p, idx) => (
+                          <motion.article
+                            key={p.id}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: idx * 0.1, duration: 0.5 }}
+                            className="relative group h-full"
+                          >
+                            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-primary-neon rounded-2xl opacity-0 group-hover:opacity-20 blur transition-all duration-500"></div>
+                            <div className="relative bg-cardBg rounded-2xl overflow-hidden border border-primary/20 hover:border-primary/50 transition-all h-full flex flex-col">
+                              <div className="relative overflow-hidden">
+                                <img
+                                  src={p.image}
+                                  alt={p.title}
+                                  className="h-40 sm:h-48 w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
+                                <div className="absolute top-3 left-3 bg-gradient-to-r from-primary to-primary-neon px-3 py-1 rounded-full text-xs sm:text-sm font-semibold text-blackPure">
+                                  {p.category}
+                                </div>
+                              </div>
+                              <div className="p-4 sm:p-6 flex-1 flex flex-col">
+                                <h3 className="text-lg sm:text-xl font-heading font-semibold mt-2 mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-primary-neon transition-all line-clamp-2">
+                                  {p.title}
+                                </h3>
+                                <p className="text-gray-400 mb-4 text-sm sm:text-base line-clamp-2 flex-1">
+                                  {p.excerpt}
+                                </p>
+                                <div className="flex justify-between text-xs sm:text-sm text-gray-500 mb-4">
+                                  <span className="flex gap-1 items-center">
+                                    <User className="w-3 h-3 sm:w-4 sm:h-4" />
+                                    {p.author}
+                                  </span>
+                                  <span className="flex gap-1 items-center">
+                                    <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                                    {p.readTime} min read
+                                  </span>
+                                </div>
+                                <button
+                                  onClick={() => openArticleModal(p)}
+                                  className="w-full bg-gradient-to-r from-primary to-primary-neon text-blackPure py-2.5 rounded-lg font-heading font-semibold hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base group/btn"
+                                >
+                                  Read Article
+                                  <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                                </button>
+                              </div>
+                            </div>
+                          </motion.article>
+                        ),
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-20">
+                      <Search className="w-16 h-16 text-gray-600 mx-auto mb-4 opacity-50" />
+                      <h3 className="text-xl font-bold text-gray-400 mb-2">
+                        No articles found
+                      </h3>
+                      <p className="text-gray-500">
+                        Try adjusting your search to find what you're looking
+                        for.
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* CASES ONLY */}
+              {activeTab === "cases" && (
+                <>
+                  {filterBySearch(caseStudies, ["title", "company", "industry"])
+                    .length > 0 ? (
+                    <div className="grid lg:grid-cols-2 gap-6 sm:gap-8">
+                      {filterBySearch(caseStudies, [
+                        "title",
+                        "company",
+                        "industry",
+                      ]).map((c, idx) => (
+                        <motion.div
+                          key={c.id}
+                          initial={{ opacity: 0, y: 30 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: idx * 0.1, duration: 0.5 }}
+                          className="relative group h-full"
+                        >
+                          <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-primary-neon rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-all duration-500"></div>
+                          <div className="relative bg-gradient-to-br from-cardBg to-bodyBg p-6 sm:p-8 rounded-2xl border border-primary/20 hover:border-primary/50 transition-all h-full flex flex-col">
+                            <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
+                              <div className="flex-1">
+                                <div className="text-primary-light text-xs sm:text-sm font-semibold mb-2">
+                                  {c.industry}
+                                </div>
+                                <h3 className="text-xl sm:text-2xl font-heading font-bold mb-2">
+                                  {c.title}
+                                </h3>
+                                <p className="text-gray-400 text-sm sm:text-base">
+                                  {c.company}
+                                </p>
+                              </div>
+                              <div className="bg-primary/20 border border-primary rounded-lg px-3 py-2 text-primary font-bold text-sm whitespace-nowrap">
+                                ROI: {c.roi}%
+                              </div>
+                            </div>
+
+                            <div className="space-y-4 mb-6 flex-1">
+                              <div>
+                                <h4 className="text-xs sm:text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
+                                  <Target className="w-4 h-4 text-red-400" />
+                                  Challenge
+                                </h4>
+                                <p className="text-gray-400 text-xs sm:text-sm">
+                                  {c.challenge}
+                                </p>
+                              </div>
+
+                              <div>
+                                <h4 className="text-xs sm:text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
+                                  <Zap className="w-4 h-4 text-yellow-400" />
+                                  Solution
+                                </h4>
+                                <p className="text-gray-400 text-xs sm:text-sm">
+                                  {c.solution}
+                                </p>
+                              </div>
+
+                              <div>
+                                <h4 className="text-xs sm:text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
+                                  <TrendingUp className="w-4 h-4 text-green-400" />
+                                  Results
+                                </h4>
+                                <ul className="space-y-2">
+                                  {(c.results || []).map((r, i) => (
+                                    <li
+                                      key={i}
+                                      className="text-gray-300 text-xs sm:text-sm flex items-start gap-2"
+                                    >
+                                      <span className="text-primary mt-1">
+                                        ✓
+                                      </span>
+                                      {r}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400 pt-4 border-t border-primary/20">
+                              <span>Timeline: {c.timeline} months</span>
+                              <span className="hidden sm:inline">•</span>
+                              <span>Investment: {c.investment}</span>
+                            </div>
                           </div>
-                        </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-20">
+                      <Search className="w-16 h-16 text-gray-600 mx-auto mb-4 opacity-50" />
+                      <h3 className="text-xl font-bold text-gray-400 mb-2">
+                        No case studies found
+                      </h3>
+                      <p className="text-gray-500">
+                        Try adjusting your search to find what you're looking
+                        for.
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
 
-                        <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400 pt-4 border-t border-primary/20">
-                          <span>Timeline: {c.timeline}</span>
-                          <span className="hidden sm:inline">•</span>
-                          <span>Investment: {c.investment}</span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </section>
-
-              {/* TIPS */}
-              <section>
-                <motion.div {...fadeIn}>
-                  <h2 className="text-2xl sm:text-3xl font-heading font-bold mb-6 sm:mb-8 flex items-center gap-3">
-                    <Lightbulb className="text-primary w-6 h-6 sm:w-8 sm:h-8" />
-                    Quick Tips
-                  </h2>
-                </motion.div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {tips.map((t, idx) => (
-                    <motion.div
-                      key={t.id}
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: idx * 0.05, duration: 0.5 }}
-                      className="relative group"
-                    >
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-primary-neon rounded-2xl opacity-0 group-hover:opacity-20 blur transition-all duration-500"></div>
-                      <div className="relative bg-cardBg p-6 rounded-2xl border border-primary/20 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 transition-all">
-                        <div className="text-3xl sm:text-4xl mb-3">
-                          {t.icon}
-                        </div>
-                        <span className="text-primary text-xs sm:text-sm font-semibold">
-                          {t.category}
-                        </span>
-                        <h4 className="font-heading font-semibold mt-2 mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-primary-neon transition-all text-sm sm:text-base">
-                          {t.title}
-                        </h4>
-                        <p className="text-gray-400 text-xs sm:text-sm">
-                          {t.description}
-                        </p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </section>
+              {/* TIPS ONLY */}
+              {activeTab === "tips" && (
+                <>
+                  {filterBySearch(tips, ["title", "description"]).length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                      {filterBySearch(tips, ["title", "description"]).map(
+                        (t, idx) => {
+                          const TipIcon = getIconComponent(t.icon);
+                          return (
+                            <motion.div
+                              key={t.id}
+                              initial={{ opacity: 0, y: 30 }}
+                              whileInView={{ opacity: 1, y: 0 }}
+                              viewport={{ once: true }}
+                              transition={{ delay: idx * 0.05, duration: 0.5 }}
+                              className="relative group h-full"
+                            >
+                              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-primary-neon rounded-2xl opacity-0 group-hover:opacity-20 blur transition-all duration-500"></div>
+                              <div className="relative bg-cardBg p-6 rounded-2xl border border-primary/20 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 transition-all h-full flex flex-col">
+                                <div className="w-12 h-12 bg-gradient-to-br from-primary-light to-primary rounded-xl flex items-center justify-center mb-3">
+                                  <TipIcon className="text-white w-6 h-6" />
+                                </div>
+                                <span className="text-primary text-xs sm:text-sm font-semibold">
+                                  {t.category}
+                                </span>
+                                <h4 className="font-heading font-semibold mt-2 mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-primary-neon transition-all text-sm sm:text-base line-clamp-2">
+                                  {t.title}
+                                </h4>
+                                <p className="text-gray-400 text-xs sm:text-sm flex-1">
+                                  {t.description}
+                                </p>
+                              </div>
+                            </motion.div>
+                          );
+                        },
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-20">
+                      <Search className="w-16 h-16 text-gray-600 mx-auto mb-4 opacity-50" />
+                      <h3 className="text-xl font-bold text-gray-400 mb-2">
+                        No tips found
+                      </h3>
+                      <p className="text-gray-500">
+                        Try adjusting your search to find what you're looking
+                        for.
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
             </>
           )}
-
-          {/* ARTICLES ONLY */}
-          {activeTab === "articles" && (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {filterBySearch(blogPosts, ["title", "excerpt"]).map((p, idx) => (
-                <motion.article
-                  key={p.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1, duration: 0.5 }}
-                  className="relative group"
-                >
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-primary-neon rounded-2xl opacity-0 group-hover:opacity-20 blur transition-all duration-500"></div>
-                  <div className="relative bg-cardBg rounded-2xl overflow-hidden border border-primary/20 hover:border-primary/50 transition-all">
-                    <div className="relative overflow-hidden">
-                      <img
-                        src={p.image}
-                        alt={p.title}
-                        className="h-40 sm:h-48 w-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute top-3 left-3 bg-gradient-to-r from-primary to-primary-neon px-3 py-1 rounded-full text-xs sm:text-sm font-semibold text-blackPure">
-                        {p.category}
-                      </div>
-                    </div>
-                    <div className="p-4 sm:p-6">
-                      <h3 className="text-lg sm:text-xl font-heading font-semibold mt-2 mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-primary-neon transition-all">
-                        {p.title}
-                      </h3>
-                      <p className="text-gray-400 mb-4 text-sm sm:text-base">
-                        {p.excerpt}
-                      </p>
-                      <div className="flex justify-between text-xs sm:text-sm text-gray-500 mb-4">
-                        <span className="flex gap-1 items-center">
-                          <User className="w-3 h-3 sm:w-4 sm:h-4" />
-                          {p.author}
-                        </span>
-                        <span className="flex gap-1 items-center">
-                          <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                          {p.readTime}
-                        </span>
-                      </div>
-                      <button className="w-full bg-gradient-to-r from-primary to-primary-neon text-blackPure py-2.5 rounded-lg font-heading font-semibold hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base group/btn">
-                        Read Article
-                        <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                      </button>
-                    </div>
-                  </div>
-                </motion.article>
-              ))}
-            </div>
-          )}
-
-          {/* CASES ONLY */}
-          {activeTab === "cases" && (
-            <div className="grid lg:grid-cols-2 gap-6 sm:gap-8">
-              {filterBySearch(caseStudies, [
-                "title",
-                "company",
-                "industry",
-              ]).map((c, idx) => (
-                <motion.div
-                  key={c.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1, duration: 0.5 }}
-                  className="relative group"
-                >
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-primary-neon rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-all duration-500"></div>
-                  <div className="relative bg-gradient-to-br from-cardBg to-bodyBg p-6 sm:p-8 rounded-2xl border border-primary/20 hover:border-primary/50 transition-all">
-                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
-                      <div className="flex-1">
-                        <div className="text-primary-light text-xs sm:text-sm font-semibold mb-2">
-                          {c.industry}
-                        </div>
-                        <h3 className="text-xl sm:text-2xl font-heading font-bold mb-2">
-                          {c.title}
-                        </h3>
-                        <p className="text-gray-400 text-sm sm:text-base">
-                          {c.company}
-                        </p>
-                      </div>
-                      <div className="bg-primary/20 border border-primary rounded-lg px-3 py-2 text-primary font-bold text-sm whitespace-nowrap">
-                        ROI: {c.roi}
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 mb-6">
-                      <div>
-                        <h4 className="text-xs sm:text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
-                          <Target className="w-4 h-4 text-red-400" />
-                          Challenge
-                        </h4>
-                        <p className="text-gray-400 text-xs sm:text-sm">
-                          {c.challenge}
-                        </p>
-                      </div>
-
-                      <div>
-                        <h4 className="text-xs sm:text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
-                          <Zap className="w-4 h-4 text-yellow-400" />
-                          Solution
-                        </h4>
-                        <p className="text-gray-400 text-xs sm:text-sm">
-                          {c.solution}
-                        </p>
-                      </div>
-
-                      <div>
-                        <h4 className="text-xs sm:text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
-                          <TrendingUp className="w-4 h-4 text-green-400" />
-                          Results
-                        </h4>
-                        <ul className="space-y-2">
-                          {c.results.map((r, i) => (
-                            <li
-                              key={i}
-                              className="text-gray-300 text-xs sm:text-sm flex items-start gap-2"
-                            >
-                              <span className="text-primary mt-1">✓</span>
-                              {r}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400 pt-4 border-t border-primary/20">
-                      <span>Timeline: {c.timeline}</span>
-                      <span className="hidden sm:inline">•</span>
-                      <span>Investment: {c.investment}</span>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-
-          {/* TIPS ONLY */}
-          {activeTab === "tips" && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filterBySearch(tips, ["title", "description"]).map((t, idx) => (
-                <motion.div
-                  key={t.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.05, duration: 0.5 }}
-                  className="relative group"
-                >
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-primary-neon rounded-2xl opacity-0 group-hover:opacity-20 blur transition-all duration-500"></div>
-                  <div className="relative bg-cardBg p-6 rounded-2xl border border-primary/20 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 transition-all">
-                    <div className="text-3xl sm:text-4xl mb-3">{t.icon}</div>
-                    <span className="text-primary text-xs sm:text-sm font-semibold">
-                      {t.category}
-                    </span>
-                    <h4 className="font-heading font-semibold mt-2 mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-primary-neon transition-all text-sm sm:text-base">
-                      {t.title}
-                    </h4>
-                    <p className="text-gray-400 text-xs sm:text-sm">
-                      {t.description}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
         </div>
+
+        {/* Article Modal */}
+        {showArticleModal && selectedArticle && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-cardBg rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-primary/20"
+            >
+              {/* Header */}
+              <div className="sticky top-0 bg-cardBg border-b border-primary/20 p-6 flex items-center justify-between z-10">
+                <div className="flex-1">
+                  <div className="bg-gradient-to-r from-primary to-primary-neon px-3 py-1 rounded-full text-xs font-semibold text-blackPure inline-block mb-2">
+                    {selectedArticle.category}
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-heading font-bold text-whitePure">
+                    {selectedArticle.title}
+                  </h2>
+                  <div className="flex gap-4 text-sm text-gray-400 mt-3">
+                    <span className="flex gap-1 items-center">
+                      <User className="w-4 h-4" />
+                      {selectedArticle.author}
+                    </span>
+                    <span className="flex gap-1 items-center">
+                      <Clock className="w-4 h-4" />
+                      {selectedArticle.readTime} min read
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={closeArticleModal}
+                  className="text-gray-400 hover:text-whitePure transition ml-4"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="p-6">
+                {/* Image */}
+                <div className="rounded-xl overflow-hidden mb-6">
+                  <img
+                    src={selectedArticle.image}
+                    alt={selectedArticle.title}
+                    className="w-full h-64 sm:h-96 object-cover"
+                  />
+                </div>
+
+                {/* Excerpt */}
+                <div className="prose prose-invert max-w-none">
+                  <p className="text-gray-300 text-lg leading-relaxed mb-6">
+                    {selectedArticle.excerpt}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </div>
     </>
   );

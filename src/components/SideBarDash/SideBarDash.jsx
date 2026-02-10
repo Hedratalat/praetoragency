@@ -4,7 +4,9 @@ import { X } from "lucide-react";
 export default function SideBarDash({ isOpen, setIsOpen }) {
   const navItems = [
     { to: "AddServices", label: "Add Services" },
-    { to: "productsManagement", label: "Manage Products" },
+    { to: "pricingDash", label: "Manage Pricing" },
+    { to: "blogDash", label: "Manage Blog" },
+    { to: "portfolioDash", label: "Manage Portfolio" },
 
     { to: "message", label: "Message" },
   ];
