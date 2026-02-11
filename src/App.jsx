@@ -2,7 +2,6 @@ import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
 import "./index.css";
 import { lazy, Suspense } from "react";
-import Portfolio from "./pages/Portfolio";
 import { Toaster } from "react-hot-toast";
 
 const Home = lazy(() => import("./pages/Home"));
@@ -10,12 +9,15 @@ const About = lazy(() => import("./pages/About"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Services = lazy(() => import("./pages/Services"));
+const ServiceDetails = lazy(() => import("./pages/ServiceDetails"));
+const Portfolio = lazy(() => import("./pages/Portfolio"));
 const Blog = lazy(() => import("./pages/Blog"));
 
 const DashBoardLayout = lazy(
   () => import("./components/DashboardLayout/DashboardLayout"),
 );
 const AddServices = lazy(() => import("./pages/ServicesDash"));
+const ManageServices = lazy(() => import("./pages/ManageServices"));
 const MessageDash = lazy(() => import("./pages/MessageDash"));
 const PricingDash = lazy(() => import("./pages/PricingDash"));
 const BlogDash = lazy(() => import("./pages/BlogDash"));
@@ -43,6 +45,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/services/:id" element={<ServiceDetails />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/portfolio" element={<Portfolio />} />
@@ -56,6 +59,7 @@ function App() {
             >
               <Route index element={<Navigate to="AddServices" replace />} />
               <Route path="AddServices" element={<AddServices />} />
+              <Route path="ManageServices" element={<ManageServices />} />
               <Route path="message" element={<MessageDash />} />
               <Route path="pricingDash" element={<PricingDash />} />
               <Route path="blogDash" element={<BlogDash />} />

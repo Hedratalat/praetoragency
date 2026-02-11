@@ -7,6 +7,8 @@ import {
   Sparkles,
   Search,
   RefreshCw,
+  Image,
+  HelpCircle,
 } from "lucide-react";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../firebase";
@@ -20,6 +22,25 @@ export default function AddServices() {
   const [description, setDescription] = useState("");
   const [featureInput, setFeatureInput] = useState("");
   const [features, setFeatures] = useState([]);
+
+  // New fields
+  const [heroTitle, setHeroTitle] = useState("");
+  const [heroSubtitle, setHeroSubtitle] = useState("");
+  const [heroImageUrl, setHeroImageUrl] = useState("");
+  const [serviceExplanation, setServiceExplanation] = useState("");
+  const [packageContentInput, setPackageContentInput] = useState("");
+  const [packageContent, setPackageContent] = useState([]);
+  const [beforeText, setBeforeText] = useState("");
+  const [afterText, setAfterText] = useState("");
+  const [beforeImageUrl, setBeforeImageUrl] = useState("");
+  const [afterImageUrl, setAfterImageUrl] = useState("");
+  const [faqQuestion, setFaqQuestion] = useState("");
+  const [faqAnswer, setFaqAnswer] = useState("");
+  const [faqs, setFaqs] = useState([]);
+  const [ctaTitle, setCtaTitle] = useState("");
+  const [ctaDescription, setCtaDescription] = useState("");
+  const [ctaButtonText, setCtaButtonText] = useState("Contact Us");
+
   const [showIconModal, setShowIconModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,6 +53,30 @@ export default function AddServices() {
 
   const removeFeature = (index) => {
     setFeatures(features.filter((_, i) => i !== index));
+  };
+
+  const addPackageContent = () => {
+    if (!packageContentInput.trim()) return;
+    setPackageContent([...packageContent, packageContentInput]);
+    setPackageContentInput("");
+  };
+
+  const removePackageContent = (index) => {
+    setPackageContent(packageContent.filter((_, i) => i !== index));
+  };
+
+  const addFaq = () => {
+    if (!faqQuestion.trim() || !faqAnswer.trim()) {
+      toast.error("Please fill both question and answer");
+      return;
+    }
+    setFaqs([...faqs, { question: faqQuestion, answer: faqAnswer }]);
+    setFaqQuestion("");
+    setFaqAnswer("");
+  };
+
+  const removeFaq = (index) => {
+    setFaqs(faqs.filter((_, i) => i !== index));
   };
 
   const selectIcon = (iconName) => {
@@ -51,7 +96,9 @@ export default function AddServices() {
 
   const handleSaveService = async () => {
     if (!selectedIcon || !title || !description || features.length === 0) {
-      toast.error("Please fill all fields and add at least one feature");
+      toast.error(
+        "Please fill all required fields (icon, title, description, and at least one feature)",
+      );
       return;
     }
 
@@ -62,15 +109,58 @@ export default function AddServices() {
         title: title,
         description: description,
         features: features,
+        // Hero Section
+        hero: {
+          title: heroTitle,
+          subtitle: heroSubtitle,
+          imageUrl: heroImageUrl,
+        },
+        // Service Explanation
+        explanation: serviceExplanation,
+        // Package Content
+        packageContent: packageContent,
+        // Before/After
+        beforeAfter: {
+          before: {
+            text: beforeText,
+            imageUrl: beforeImageUrl,
+          },
+          after: {
+            text: afterText,
+            imageUrl: afterImageUrl,
+          },
+        },
+        // FAQs
+        faqs: faqs,
+        // CTA
+        cta: {
+          title: ctaTitle,
+          description: ctaDescription,
+          buttonText: ctaButtonText,
+        },
         createdAt: new Date().toISOString(),
       });
 
       toast.success("Service added successfully");
 
+      // Reset all fields
       setSelectedIcon(null);
       setTitle("");
       setDescription("");
       setFeatures([]);
+      setHeroTitle("");
+      setHeroSubtitle("");
+      setHeroImageUrl("");
+      setServiceExplanation("");
+      setPackageContent([]);
+      setBeforeText("");
+      setAfterText("");
+      setBeforeImageUrl("");
+      setAfterImageUrl("");
+      setFaqs([]);
+      setCtaTitle("");
+      setCtaDescription("");
+      setCtaButtonText("Contact Us");
     } catch (error) {
       console.error("Error adding service:", error);
       toast.error("Error adding service. Please try again.");
@@ -81,86 +171,207 @@ export default function AddServices() {
 
   return (
     <div className="min-h-screen py-8 px-4">
-      <div className="max-w-3xl mx-auto bg-cardBg p-6 rounded-2xl shadow-lg">
+      <div className="max-w-4xl mx-auto bg-cardBg p-6 rounded-2xl shadow-lg">
         <h2 className="text-xl sm:text-2xl text-center font-bold mb-6 text-whitePure">
           Add Marketing Service
         </h2>
 
-        {/* Icon Picker */}
-        <div className="mb-6">
-          <label className="block mb-3 text-sm font-medium text-whitePure">
-            Choose Icon
-          </label>
+        {/* BASIC INFORMATION */}
+        <div className="mb-8 p-5 bg-grayLight rounded-xl">
+          <h3 className="text-lg font-semibold text-primary-light mb-4">
+            Basic Information
+          </h3>
 
-          <button
-            type="button"
-            onClick={() => setShowIconModal(true)}
-            className="w-full p-4 rounded-xl bg-grayLight text-whitePure hover:bg-primary-dark transition flex items-center justify-center gap-3"
-          >
-            {SelectedIconComponent ? (
-              <>
-                <SelectedIconComponent
-                  size={24}
-                  className="text-primary-light"
-                />
-                <span>Change Icon</span>
-              </>
-            ) : (
-              <>
-                <Sparkles size={24} className="text-primary-light" />
-                <span>Select Icon</span>
-              </>
+          {/* Icon Picker */}
+          <div className="mb-6">
+            <label className="block mb-3 text-sm font-medium text-whitePure">
+              Choose Icon *
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowIconModal(true)}
+              className="w-full p-4 rounded-xl bg-grayDarkest text-whitePure hover:bg-primary-dark transition flex items-center justify-center gap-3"
+            >
+              {SelectedIconComponent ? (
+                <>
+                  <SelectedIconComponent
+                    size={24}
+                    className="text-primary-light"
+                  />
+                  <span>Change Icon</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles size={24} className="text-primary-light" />
+                  <span>Select Icon</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Title */}
+          <div className="mb-4">
+            <label className="block mb-2 text-sm font-medium text-whitePure">
+              Service Title *
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g., Social Media Management"
+              className="w-full px-4 py-2 rounded-lg bg-grayDarkest text-whitePure placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+
+          {/* Description */}
+          <div className="mb-4">
+            <label className="block mb-2 text-sm font-medium text-whitePure">
+              Short Description *
+            </label>
+            <textarea
+              rows="3"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Brief description of the service..."
+              className="w-full px-4 py-2 rounded-lg bg-grayDarkest text-whitePure placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+
+          {/* Features */}
+          <div>
+            <label className="block mb-2 text-sm font-medium text-whitePure">
+              Service Features *
+            </label>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
+              <input
+                type="text"
+                value={featureInput}
+                onChange={(e) => setFeatureInput(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && addFeature()}
+                placeholder="Add a feature (press Enter)"
+                className="flex-1 px-4 py-2 rounded-lg bg-grayDarkest text-whitePure placeholder-gray-400 
+                 focus:outline-none focus:ring-2 focus:ring-primary w-full"
+              />
+              <button
+                type="button"
+                onClick={addFeature}
+                className="bg-primary-dark px-4 py-2 rounded-lg text-whitePure hover:bg-primary 
+                 transition flex items-center justify-center w-full sm:w-auto mt-2 sm:mt-0"
+              >
+                <Plus size={18} />
+              </button>
+            </div>
+
+            {features.length > 0 && (
+              <ul className="space-y-2">
+                {features.map((feature, index) => (
+                  <li
+                    key={index}
+                    className="flex items-center justify-between bg-grayDarkest px-4 py-3 rounded-lg group hover:bg-gray-700 transition"
+                  >
+                    <div className="flex items-center gap-2">
+                      <CheckCircle size={16} className="text-primary-light" />
+                      <span className="text-whitePure">{feature}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeFeature(index)}
+                      className="text-red-400 hover:text-red-500"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
             )}
-          </button>
+          </div>
         </div>
 
-        {/* Title */}
-        <div className="mb-4">
-          <label className="block mb-2 text-sm font-medium text-whitePure">
-            Service Title
-          </label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g., Social Media Management"
-            className="w-full px-4 py-2 rounded-lg bg-grayLight text-whitePure placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+        {/* HERO SECTION */}
+        <div className="mb-8 p-5 bg-grayLight rounded-xl">
+          <h3 className="text-lg font-semibold text-primary-light mb-4">
+            Hero Section
+          </h3>
+
+          <div className="mb-4">
+            <label className="block mb-2 text-sm font-medium text-whitePure">
+              Hero Title
+            </label>
+            <input
+              type="text"
+              value={heroTitle}
+              onChange={(e) => setHeroTitle(e.target.value)}
+              placeholder="e.g., Transform Your Social Media Presence"
+              className="w-full px-4 py-2 rounded-lg bg-grayDarkest text-whitePure placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block mb-2 text-sm font-medium text-whitePure">
+              Hero Subtitle
+            </label>
+            <textarea
+              rows="2"
+              value={heroSubtitle}
+              onChange={(e) => setHeroSubtitle(e.target.value)}
+              placeholder="e.g., Professional social media management that drives engagement and growth"
+              className="w-full px-4 py-2 rounded-lg bg-grayDarkest text-whitePure placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+
+          <div>
+            <label className="block mb-2 text-sm font-medium text-whitePure">
+              Hero Image URL
+            </label>
+            <input
+              type="text"
+              value={heroImageUrl}
+              onChange={(e) => setHeroImageUrl(e.target.value)}
+              placeholder="https://example.com/hero-image.jpg"
+              className="w-full px-4 py-2 rounded-lg bg-grayDarkest text-whitePure placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
         </div>
 
-        {/* Description */}
-        <div className="mb-4">
-          <label className="block mb-2 text-sm font-medium text-whitePure">
-            Description
-          </label>
-          <textarea
-            rows="4"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Describe your marketing service..."
-            className="w-full px-4 py-2 rounded-lg bg-grayLight text-whitePure placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+        {/* SERVICE EXPLANATION */}
+        <div className="mb-8 p-5 bg-grayLight rounded-xl">
+          <h3 className="text-lg font-semibold text-primary-light mb-4">
+            Service Explanation
+          </h3>
+
+          <div>
+            <label className="block mb-2 text-sm font-medium text-whitePure">
+              Detailed Explanation
+            </label>
+            <textarea
+              rows="6"
+              value={serviceExplanation}
+              onChange={(e) => setServiceExplanation(e.target.value)}
+              placeholder="Provide a detailed explanation of what this service includes, how it works, and what makes it unique..."
+              className="w-full px-4 py-2 rounded-lg bg-grayDarkest text-whitePure placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
         </div>
 
-        {/* Features */}
-        <div className="mb-6">
-          <label className="block mb-2 text-sm font-medium text-whitePure">
-            Service Features
-          </label>
+        {/* PACKAGE CONTENT */}
+        <div className="mb-8 p-5 bg-grayLight rounded-xl">
+          <h3 className="text-lg font-semibold text-primary-light mb-4">
+            Package Content - What's Included?
+          </h3>
 
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
             <input
               type="text"
-              value={featureInput}
-              onChange={(e) => setFeatureInput(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && addFeature()}
-              placeholder="Add a feature (press Enter)"
-              className="flex-1 px-4 py-2 rounded-lg bg-grayLight text-whitePure placeholder-gray-400 
+              value={packageContentInput}
+              onChange={(e) => setPackageContentInput(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && addPackageContent()}
+              placeholder="Add package item (press Enter)"
+              className="flex-1 px-4 py-2 rounded-lg bg-grayDarkest text-whitePure placeholder-gray-400 
                focus:outline-none focus:ring-2 focus:ring-primary w-full"
             />
             <button
               type="button"
-              onClick={addFeature}
+              onClick={addPackageContent}
               className="bg-primary-dark px-4 py-2 rounded-lg text-whitePure hover:bg-primary 
                transition flex items-center justify-center w-full sm:w-auto mt-2 sm:mt-0"
             >
@@ -168,20 +379,20 @@ export default function AddServices() {
             </button>
           </div>
 
-          {features.length > 0 && (
+          {packageContent.length > 0 && (
             <ul className="space-y-2">
-              {features.map((feature, index) => (
+              {packageContent.map((item, index) => (
                 <li
                   key={index}
-                  className="flex items-center justify-between bg-grayLight px-4 py-3 rounded-lg group hover:bg-gray-700 transition"
+                  className="flex items-center justify-between bg-grayDarkest px-4 py-3 rounded-lg group hover:bg-gray-700 transition"
                 >
                   <div className="flex items-center gap-2">
                     <CheckCircle size={16} className="text-primary-light" />
-                    <span className="text-whitePure">{feature}</span>
+                    <span className="text-whitePure">{item}</span>
                   </div>
                   <button
                     type="button"
-                    onClick={() => removeFeature(index)}
+                    onClick={() => removePackageContent(index)}
                     className="text-red-400 hover:text-red-500"
                   >
                     <Trash2 size={16} />
@@ -192,7 +403,148 @@ export default function AddServices() {
           )}
         </div>
 
-        {/* Save */}
+        {/* BEFORE / AFTER */}
+        <div className="mb-8 p-5 bg-grayLight rounded-xl">
+          <h3 className="text-lg font-semibold text-primary-light mb-4 flex items-center gap-2">
+            <Image size={20} />
+            Before / After (Optional)
+          </h3>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Before */}
+            <div>
+              <h4 className="text-md font-semibold text-whitePure mb-3">
+                Before
+              </h4>
+              <div className="mb-3">
+                <label className="block mb-2 text-sm font-medium text-whitePure">
+                  Before Text
+                </label>
+                <textarea
+                  rows="3"
+                  value={beforeText}
+                  onChange={(e) => setBeforeText(e.target.value)}
+                  placeholder="Describe the situation before using this service..."
+                  className="w-full px-4 py-2 rounded-lg bg-grayDarkest text-whitePure placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="block mb-2 text-sm font-medium text-whitePure">
+                  Before Image URL
+                </label>
+                <input
+                  type="text"
+                  value={beforeImageUrl}
+                  onChange={(e) => setBeforeImageUrl(e.target.value)}
+                  placeholder="https://example.com/before.jpg"
+                  className="w-full px-4 py-2 rounded-lg bg-grayDarkest text-whitePure placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+            </div>
+
+            {/* After */}
+            <div>
+              <h4 className="text-md font-semibold text-whitePure mb-3">
+                After
+              </h4>
+              <div className="mb-3">
+                <label className="block mb-2 text-sm font-medium text-whitePure">
+                  After Text
+                </label>
+                <textarea
+                  rows="3"
+                  value={afterText}
+                  onChange={(e) => setAfterText(e.target.value)}
+                  placeholder="Describe the results after using this service..."
+                  className="w-full px-4 py-2 rounded-lg bg-grayDarkest text-whitePure placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="block mb-2 text-sm font-medium text-whitePure">
+                  After Image URL
+                </label>
+                <input
+                  type="text"
+                  value={afterImageUrl}
+                  onChange={(e) => setAfterImageUrl(e.target.value)}
+                  placeholder="https://example.com/after.jpg"
+                  className="w-full px-4 py-2 rounded-lg bg-grayDarkest text-whitePure placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* FAQs */}
+        <div className="mb-8 p-5 bg-grayLight rounded-xl">
+          <h3 className="text-lg font-semibold text-primary-light mb-4 flex items-center gap-2">
+            <HelpCircle size={20} />
+            Frequently Asked Questions
+          </h3>
+
+          <div className="mb-4">
+            <label className="block mb-2 text-sm font-medium text-whitePure">
+              Question
+            </label>
+            <input
+              type="text"
+              value={faqQuestion}
+              onChange={(e) => setFaqQuestion(e.target.value)}
+              placeholder="e.g., How long does it take to see results?"
+              className="w-full px-4 py-2 rounded-lg bg-grayDarkest text-whitePure placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="block mb-2 text-sm font-medium text-whitePure">
+              Answer
+            </label>
+            <textarea
+              rows="3"
+              value={faqAnswer}
+              onChange={(e) => setFaqAnswer(e.target.value)}
+              placeholder="Provide a detailed answer..."
+              className="w-full px-4 py-2 rounded-lg bg-grayDarkest text-whitePure placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={addFaq}
+            className="w-full bg-primary-dark px-4 py-2 rounded-lg text-whitePure hover:bg-primary 
+             transition flex items-center justify-center gap-2"
+          >
+            <Plus size={18} />
+            Add FAQ
+          </button>
+
+          {faqs.length > 0 && (
+            <div className="mt-4 space-y-3">
+              {faqs.map((faq, index) => (
+                <div
+                  key={index}
+                  className="bg-grayDarkest p-4 rounded-lg group hover:bg-gray-700 transition"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h5 className="font-semibold text-primary-light">
+                      Q: {faq.question}
+                    </h5>
+                    <button
+                      type="button"
+                      onClick={() => removeFaq(index)}
+                      className="text-red-400 hover:text-red-500 ml-2"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                  <p className="text-whitePure text-sm">A: {faq.answer}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Save Button */}
         <button
           onClick={handleSaveService}
           disabled={loading}

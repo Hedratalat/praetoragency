@@ -1,127 +1,12 @@
 import { motion } from "framer-motion";
-import {
-  Share2,
-  Megaphone,
-  Palette,
-  Code,
-  Video,
-  Camera,
-  Search,
-  FileText,
-  ArrowRight,
-  CheckCircle,
-  Sparkles,
-} from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
 import Navbar from "../components/Navbar/Navbar";
-
-const services = [
-  {
-    icon: Share2,
-    title: "Social Media Management",
-    description:
-      "Build and engage your audience across all major platforms with strategic content.",
-    features: [
-      "Content Strategy",
-      "Community Management",
-      "Analytics & Reporting",
-      "Brand Voice Development",
-    ],
-    color: "from-emerald-500 to-teal-500",
-  },
-  {
-    icon: Megaphone,
-    title: "Social Media Ads",
-    description:
-      "Drive conversions with targeted ad campaigns that deliver measurable results.",
-    features: [
-      "Campaign Strategy",
-      "Ad Creative Design",
-      "A/B Testing",
-      "ROI Optimization",
-    ],
-    color: "from-lime-500 to-emerald-500",
-  },
-  {
-    icon: Palette,
-    title: "Branding & Visual Identity",
-    description:
-      "Create a memorable brand that resonates with your target audience.",
-    features: [
-      "Logo Design",
-      "Brand Guidelines",
-      "Color Palette",
-      "Typography System",
-    ],
-    color: "from-emerald-500 to-cyan-500",
-  },
-  {
-    icon: Code,
-    title: "Web Design & Development",
-    description:
-      "Build stunning, high-performance websites that convert visitors into customers.",
-    features: [
-      "Responsive Design",
-      "Custom Development",
-      "Performance Optimization",
-      "Maintenance & Support",
-    ],
-    color: "from-teal-500 to-emerald-500",
-  },
-  {
-    icon: Video,
-    title: "Video Production",
-    description:
-      "Tell your story with compelling video content that captures attention.",
-    features: [
-      "Concept Development",
-      "Professional Filming",
-      "Post Production",
-      "Motion Graphics",
-    ],
-    color: "from-emerald-500 to-green-500",
-  },
-  {
-    icon: Camera,
-    title: "Photography",
-    description:
-      "Professional product and brand photography that showcases your business.",
-    features: [
-      "Product Photography",
-      "Brand Photoshoots",
-      "Image Retouching",
-      "Creative Direction",
-    ],
-    color: "from-lime-500 to-teal-500",
-  },
-  {
-    icon: Search,
-    title: "SEO",
-    description:
-      "Improve your search rankings and drive organic traffic to your website.",
-    features: [
-      "Keyword Research",
-      "On-Page Optimization",
-      "Technical SEO",
-      "Link Building",
-    ],
-    color: "from-emerald-500 to-lime-500",
-  },
-  {
-    icon: FileText,
-    title: "Content Creation",
-    description:
-      "Engage your audience with high-quality, strategic content that drives action.",
-    features: [
-      "Blog Writing",
-      "Copywriting",
-      "Content Strategy",
-      "Editorial Calendar",
-    ],
-    color: "from-teal-500 to-lime-500",
-  },
-];
+import { ArrowRight, CheckCircle, RefreshCw } from "lucide-react";
+import { MARKETING_ICONS } from "../utils/marketing";
+import toast from "react-hot-toast";
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -130,27 +15,12 @@ const fadeIn = {
   transition: { duration: 0.6 },
 };
 
-const Button = ({ children, variant = "primary", onClick }) => {
-  const baseClasses =
-    "px-8 py-4 rounded-lg font-heading font-semibold transition-all duration-300 inline-flex items-center gap-2 group";
-  const variants = {
-    primary:
-      "bg-gradient-to-r from-primary to-primary-neon text-blackPure hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] hover:scale-105",
-    outline:
-      "border-2 border-primary text-primary hover:bg-primary/10 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]",
-  };
-
-  return (
-    <button onClick={onClick} className={`${baseClasses} ${variants[variant]}`}>
-      {children}
-      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-    </button>
-  );
-};
-
-const ServiceCard = ({ service, index }) => {
+const ServiceCard = ({ service, index, onClick }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const Icon = service.icon;
+
+  // Get icon component from MARKETING_ICONS
+  const iconData = MARKETING_ICONS.find((i) => i.name === service.icon);
+  const Icon = iconData?.icon;
 
   return (
     <motion.div
@@ -160,32 +30,27 @@ const ServiceCard = ({ service, index }) => {
       transition={{ delay: index * 0.1, duration: 0.5 }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="relative group"
+      onClick={onClick}
+      className="relative group cursor-pointer"
     >
       {/* Glow effect */}
-      <div
-        className={`absolute -inset-0.5 bg-gradient-to-r ${service.color} rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-all duration-500`}
-      ></div>
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-primary-neon rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-all duration-500"></div>
 
       <div className="relative bg-cardBg border border-primary/20 rounded-2xl p-8 h-full hover:border-primary/50 transition-all duration-500 overflow-hidden">
         {/* Animated background gradient */}
-        <div
-          className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
-        ></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary-neon/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
         {/* Icon container with animated gradient */}
         <div className="relative mb-6">
-          <div
-            className={`w-16 h-16 bg-gradient-to-br ${service.color} rounded-xl flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}
-          >
-            <Icon className="text-blackPure" size={28} />
+          <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-neon rounded-xl flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+            {Icon && <Icon className="text-blackPure" size={28} />}
           </div>
           <motion.div
             animate={
               isHovered ? { scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] } : {}
             }
             transition={{ duration: 2, repeat: Infinity }}
-            className={`absolute inset-0 w-16 h-16 bg-gradient-to-br ${service.color} rounded-xl opacity-0`}
+            className="absolute inset-0 w-16 h-16 bg-gradient-to-br from-primary to-primary-neon rounded-xl opacity-0"
           ></motion.div>
         </div>
 
@@ -199,7 +64,7 @@ const ServiceCard = ({ service, index }) => {
 
         {/* Features list */}
         <div className="space-y-3 mb-6">
-          {service.features.map((feature, idx) => (
+          {service.features.slice(0, 4).map((feature, idx) => (
             <motion.div
               key={idx}
               initial={{ opacity: 0, x: -10 }}
@@ -215,7 +80,7 @@ const ServiceCard = ({ service, index }) => {
         </div>
 
         {/* Learn more link */}
-        <div className="flex items-center gap-2 text-primary font-semibold text-sm group-hover:gap-3 transition-all cursor-pointer">
+        <div className="flex items-center gap-2 text-primary font-semibold text-sm group-hover:gap-3 transition-all">
           <span>Learn More</span>
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </div>
@@ -226,6 +91,35 @@ const ServiceCard = ({ service, index }) => {
 
 export default function Services() {
   const navigate = useNavigate();
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      setLoading(true);
+      const querySnapshot = await getDocs(collection(db, "services"));
+      const servicesData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setServices(servicesData);
+    } catch (error) {
+      console.error("Error fetching services:", error);
+      toast.error("Error loading services");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleServiceClick = (serviceId) => {
+    navigate(`/services/${serviceId}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <>
       <Navbar />
@@ -252,13 +146,30 @@ export default function Services() {
         </section>
 
         {/* Services Grid */}
-        <section className="relative">
+        <section className="relative pb-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {services.map((service, index) => (
-                <ServiceCard key={index} service={service} index={index} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <RefreshCw className="w-10 h-10 text-primary animate-spin" />
+              </div>
+            ) : services.length === 0 ? (
+              <div className="text-center py-20">
+                <p className="text-gray-400 text-lg">
+                  No services available yet.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {services.map((service, index) => (
+                  <ServiceCard
+                    key={service.id}
+                    service={service}
+                    index={index}
+                    onClick={() => handleServiceClick(service.id)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
